@@ -16,17 +16,27 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
 
   return {
     paths: pokemonIds.map((id) => ({ params: { id } })),
-    fallback: false,
+    fallback: "blocking",
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { id } = params as { id: string };
   const pokemon = await getPokemonByParam(id);
-
+  if (pokemon) {
+    return {
+      props: {
+        pokemon: pokemon || [],
+      },
+      revalidate: true,
+    };
+  }
   return {
-    props: {
-      pokemon: pokemon || [],
+    redirect: {
+      destination: "/",
+      permanent: false,
+      //* permanent: true = la redirección a otra página lo elimina del indice, significa que no esa página nunca más será accedida
+      //* permanent: false = significa que esa página puede ser accedida en un futuro.
     },
   };
 };
